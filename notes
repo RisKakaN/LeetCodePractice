@@ -1,0 +1,251 @@
+=========================================================================================================================================
+============================================================ Data Structures ============================================================
+=========================================================================================================================================
+
+============================== Array ==============================
+Space	O(n)
+Lookup	O(1)
+Append	O(1)
+Insert	O(n)
+Delete	O(n)
+
+Strength:
+- Fast lookups. Retrieving the element at a given index takes O(1) time, regardless of the length of the array.
+- Fast appends. Adding a new element at the end of the array takes O(1) time.
+
+Weakness:
+- Costly inserts and deletes O(n). You have to "bubble back" the other elements to fill in or close gaps, which takes worst-case O(n) time.
+
+============================== Dynamic Array (Array lists) ==============================
+Space	O(n)
+Lookup	O(1)
+Append	O(1), worst O(n)
+Insert	O(n)
+Delete	O(n)
+
+============================== Linked List ==============================
+Space	O(n)
+Prepend	O(1)
+Append	O(1)
+Lookup	O(n)
+Insert	O(1)
+Delete	O(1)
+- A linked list organizes items sequentially, with each item storing a pointer to the next one.
+- Picture a linked list like a chain of paperclips linked together. It's quick to add another paperclip to the top or bottom. 
+  It's even quick to insert one in the middle — just disconnect the chain at the middle link, add the new paperclip, then reconnect the other half.
+- An item in a linked list is called a node. The first node is called the head. The last node is called the tail.
+
+Strengths:
+- Fast operations on the ends. Adding elements at either end of a linked list is O(1). Removing the first element is also O(1).
+- Flexible size. There's no need to specify how many elements you're going to store ahead of time. 
+  You can keep adding elements as long as there's enough space on the machine.
+
+Weakness:
+- Costly lookups. To access or edit an item in a linked list, you have to take O(i) time to walk from the head of the list to the i:th item.
+
+============================== Queue ==============================
+Space	O(n)
+Enqueue	O(1)
+Dequeue	O(1)
+Peek	O(1)
+
+- A queue stores items in a first-in, first-out (FIFO) order.
+
+Strengths:
+- Fast operations. All queue operations take O(1) time.
+
+============================== Stack ==============================
+Space	O(n)
+Push	O(1)
+Pop	    O(1)
+Peek	O(1)
+
+- A stack stores items in a last-in, first-out (LIFO) order.
+
+Strengths:
+- Fast operations. All stack operations take O(1) time.
+
+============================== Hash Table (Hash Map)==============================
+Space	O(n)
+Insert	O(1), worst	O(n)
+Lookup	O(1), worst	O(n)
+Delete	O(1), worst	O(n)
+
+- A hash table organizes data so you can quickly look up values for a given key.
+- Hash maps are built on arrays.
+- Hash table is an "array" but does not use normal indices.
+  A value of a key turns into an index by hashing it (converts value of a key to an index), and can thus find the value in the array.
+- If two keys hash to the same index: Hash collision.
+  Then the index in the array does not contain a value anymore. The index instead points to a Linked List.
+  Therefore, the index can hold multiple values in the Linked List.
+- Hash collisions cause O(n) lookup. 
+  Can end up in all values being in one Linked List, and then looking for a value requires looping through the entire Linked List.
+- If the "array" gets too big and requires resizing, this will take O(n) time. Because all hashes needs to be reallocated.
+
+Strengths:
+- Fast lookups. Lookups take O(1) time on average.
+- Flexible keys. Most data types can be used for keys, as long as they're hashable.
+
+Weakness:
+- Slow worst-case lookups. Lookups take O(n) time in the worst case.
+- Looping required to find key. O(n)
+
+============================== Sets ==============================
+- A set is like a hash map except it only stores keys, without values.
+- Sets often come up when we're tracking groups of items—nodes we've visited in a graph, 
+  characters we've seen in a string, or colors used by neighboring nodes. Usually, we're interested in whether something is in a set or not.
+
+============================== Tree ==============================
+- A tree organizes values hierarchically.
+- Each entry in the tree is called a node, and every node links to zero or more child nodes.
+- Leaf nodes are nodes that're on the bottom of the tree (more formally: nodes that have no children).
+- Each node in a tree has a depth: the number of links from the root to the node.
+- A tree's height is the number of links from its root to the furthest leaf.
+
+
+============================== Binary Tree ==============================
+- A binary tree is a tree where every node has at most two children.
+
+
+============================== Binary Search Tree (BST) ==============================
+Space	O(n)
+Insert	O(lg(n)), worst	O(n)
+Lookup	O(lg(n)), worst	O(n)
+Delete	O(lg(n)), worst	O(n)
+(Best case: balanced, Worst case: unbalanced.)
+
+- Each node must be greater than (or equal to) any values in its left subtree, but less than (or equal to) any values in its right subtree
+- The nodes to the left are smaller than the current node.
+- The nodes to the right are larger than the current node.
+
+Strengths:
+- Good performance across the board. Assuming they're balanced, binary search trees are good at lots of operations, even if they're not constant time for anything.
+Weakness:
+- No O(1) operations.
+
+============================== Graph ==============================
+- A graph organizes items in an interconnected network. Each item is a node (or vertex). Nodes are connected by edges.
+- In directed graphs, edges point from the node at one end to the node at the other end. In undirected graphs, the edges simply connect the nodes at each end.
+- If a graph is weighted, each edge has a "weight." 
+  The weight could, for example, represent the distance between two locations, or the cost or time it takes to travel between the locations.
+- A graph coloring is when you assign colors to each node in a graph. A legal coloring means no adjacent nodes have the same color.
+
+- Is there a path between two nodes in this undirected graph? 
+  Run DFS or BFS from one node and see if you reach the other one.
+
+- What's the shortest path between two nodes in this undirected, unweighted graph? 
+  Run BFS from one node and backtrack once you reach the second. 
+  Note: BFS always finds the shortest path, assuming the graph is undirected and unweighted. DFS does not always find the shortest path.
+
+- Does this undirected graph have a cycle? 
+  Run BFS, keeping track of the number of times we're visiting each node. If we ever visit a node twice, then we have a cycle.
+
+============================== Heap ==============================
+Get min	   O(1)
+Remove min O(lg(n))
+Insert	   O(lg(n))
+Heapify	   O(n)
+Space	   O(n)
+
+- A binary heap is a binary tree where the smallest value is always at the top.
+- A min-heap has the smallest value at the top. A max-heap has the largest value at the top.
+
+Strengths:
+- Quickly access the smallest item. 
+  Binary heaps allow you to grab the smallest item (the root) in O(1) time, while keeping other operations relatively cheap, O(lg(n)) time.
+
+Weakness:
+- Limited interface. Binary heaps only provide easy access to the smallest item. 
+  Finding other items in the heap takes O(n) time, since we have to iterate through all the nodes.
+
+
+============================== Priority Queue ==============================
+Space	O(n)
+Peek	O(1)
+Dequeue	O(lg(n))
+Enqueue	O(lg(n))
+
+- Picture a big list of bugs for an engineering team to tackle. You want to keep the highest-priority bugs at the top of the list.
+- Every item in the queue has a priority.
+- Higher-priority items are dequeued before lower-priority items.
+
+============================== Breadth First Search (BFS) ==============================
+- In a BFS, you first explore all the nodes one step away, then all the nodes two steps away, etc..
+- A BFS will find the shortest path between the starting point and any other reachable node.
+- A BFS on a binary tree generally requires more memory than a DFS.
+
+
+============================== Depth First Search (DFS) ==============================
+- In a DFS, you go as deep as possible down one path before backing up and trying a different one.
+- A depth-first search will not necessarily find the shortest path.
+- Depth-first search on a binary tree generally requires less memory than breadth-first.
+- Depth-first search can be easily implemented with recursion.
+
+============================== Binary Search Algorithm ==============================
+- A binary search algorithm finds an item in a sorted list in O(lg(n)) time.
+- A brute force search would walk through the whole list, taking O(n) time in the worst case.
+
+- Let's say we have a sorted list of numbers. To find a number with a binary search, we:
+
+    1. Start with the middle number: is it bigger or smaller than our target number? 
+       Since the list is sorted, this tells us if the target would be in the left half or the right half of our list.
+    2. We've effectively divided the problem in half. 
+       We can "rule out" the whole half of the list that we know doesn't contain the target number.
+    3. Repeat the same approach (of starting in the middle) on the new half-size problem. 
+       Then do it again and again, until we either find the number or "rule out" the whole set. That is, size is 1.
+
+O(lg(n)):
+Get the size to 1 (which means that the target is found): 1 = n * 1/2 * 1/2 * 1/2 ... (x times) = n*(1/2)^x -> x = log(n)
+How many times do we need to divide until we get to size = 1? log(n) times.
+
+=========================================================================================================================================
+==================================================================== Theory =============================================================
+=========================================================================================================================================
+
+============================== Space Complexity ==============================
+- Usually when we talk about space complexity, we're talking about additional space, so we don't include space taken up by the inputs. 
+  For example, a method takes constant space even though the input has n items.
+- If an array is initialized with size n, then space complexity for this method is O(n).
+
+============================== Java: Heap vs Stack ==============================
+- Heap = Stores objects that lives as long as application lives.
+- Stack = Temporary storage. Stores objects created in methods, but will be destroyed once method is finished.
+
+============================== Hashing and Hash Functions ==============================
+- A hash function takes data (like a string, or a file’s contents) and outputs a hash, a fixed-size string or number.
+- Ex on MD5 hash function: cake -> DF7CE038E2FA96EDF39206F898DF134D, cakes -> 0E9091167610558FDAE6F69BD6716771.
+- Hash collision: Multiple values have the same hash.
+
+============================== Directed Graph ==============================
+- Set of vertices connected by directed edges.
+
+============================== Directed Acyclic Graph (DAG) ==============================
+- Directed graph with no directed cycles.
+- Cyclic = cycles, Asyclic = no cycles.
+
+============================== Topological sorting/ordering ==============================
+- A topological ordering is possible if and only if the graph has no directed cycles, that is, if it is a directed acyclic graph (DAG).
+- In a DAG where vertex x with directed edge to vertex y, vertex x will be ordered before y. That is, x,y.
+- Start at "top", and work your way down, following the directed edges.
+
+============================== Balanced binary trees ==============================
+- A balanced binary tree is a tree whose height is small relative to the number of nodes it has. 
+  By small, we usually mean the height is O(lg(n)), where n is the number of nodes.
+- A tree is balanced if: (a) the heights of its left and right subtrees differ by at most 1, and (b) both subtrees are also balanced.
+
+============================== Minimum Spanning Tree (MST) ==============================
+- A minimum spanning tree (MST) or minimum weight spanning tree is a subset of the edges of a connected, 
+  edge-weighted undirected graph that connects all the vertices together, without any cycles and with the minimum possible total edge weight. 
+  That is, it is a spanning tree whose sum of edge weights is as small as possible.
+
+============================== Greedy Algorithms ==============================
+- A greedy algorithm builds up a solution by choosing the option that looks the best at every step.
+- Trying to fit as many overlapping meetings as possible in a conference room? At each step, schedule the meeting that ends earliest.
+
+============================== Bottom-Up Algorithms ==============================
+- Dynamic programming.
+- Going bottom-up is a way to avoid recursion, saving the memory cost that recursion incurs when it builds up the call stack.
+
+============================== Memoization ==============================
+- Memoization is a common strategy for dynamic programming problems.
+- Memoization ensures that a method doesn't run for the same inputs more than once by keeping a record of the results for the given inputs (usually in a hash map).

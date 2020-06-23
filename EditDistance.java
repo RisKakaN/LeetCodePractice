@@ -1,0 +1,153 @@
+public class EditDistance {
+
+    /**
+     * Given two words word1 and word2, find the minimum number of operations
+     * required to convert word1 to word2.
+     * 
+     * You have the following 3 operations permitted on a word:
+     * 
+     * 1. Insert a character
+     * 
+     * 2. Delete a character
+     * 
+     * 3. Replace a character
+     * 
+     * Example 1:
+     * 
+     * Input: word1 = "horse", word2 = "ros"
+     * 
+     * Output: 3 Explanation:
+     * 
+     * horse -> rorse (replace 'h' with 'r')
+     * 
+     * rorse -> rose (remove 'r')
+     * 
+     * rose -> ros (remove 'e')
+     * 
+     * Example 2:
+     * 
+     * Input: word1 = "intention", word2 = "execution"
+     * 
+     * Output: 5 Explanation:
+     * 
+     * intention -> inention (remove 't')
+     * 
+     * inention -> enention (replace 'i' with 'e')
+     * 
+     * enention -> exention (replace 'n' with 'x')
+     * 
+     * exention -> exection (replace 'n' with 'c')
+     * 
+     * exection -> execution (insert 'u')
+     */
+
+    // Memoization: 2d array for storing calculations, with quick access.
+    int[][] mem;
+
+    public int minDistance(String word1, String word2) {
+        // Make use of memoization so that calculating duplicates is ignored.
+        mem = new int[word1.length()][word2.length()];
+        return helper(word1, word2, word1.length() - 1, word2.length() - 1);
+    }
+
+    private int helper(String word1, String word2, int word1Pointer, int word2Pointer) {
+        // If the two words are the same, then no edits are needed, hence return 0.
+        if (word1.equals(word2)) {
+            return 0;
+        }
+        // If word1 has been edited up to its own length, and there are still insertions
+        // that can be made, in order to match word2, then return number of insertions.
+        if (word1Pointer < 0) {
+            return word2Pointer + 1; // Add 1 in order to go from character index to actual length/size.
+        }
+
+        // If word1 has been edited up to its own length, and there are still deletions
+        // needed in order to match word2, then return number of deletions.
+        if (word2Pointer < 0) {
+            return word1Pointer + 1; // Add 1 in order to go from character index to actual length/size.
+        }
+
+        // If operations for this positioning of word pointers, have been calculated,
+        // then reuse the value and skip duplicate calculations.
+        if (mem[word1Pointer][word2Pointer] != 0) {
+            return mem[word1Pointer][word2Pointer];
+        }
+
+        int operations;
+
+        // Edits: Find minimum operations
+        // Insertion, Deletion, Replacement, all increment number of operations by one.
+        // Basically try all ways, and get the path with minimum operations.
+        if (word1.charAt(word1Pointer) != word2.charAt(word2Pointer)) {
+
+            operations = Math.min(1 + helper(word1, word2, word1Pointer - 1, word2Pointer - 1),
+                    Math.min(1 + helper(word1, word2, word1Pointer - 1, word2Pointer),
+                            1 + helper(word1, word2, word1Pointer, word2Pointer - 1)));
+        } else {
+            // No edits:
+            // Increment pointers without incrementing number of operations.
+            operations = helper(word1, word2, word1Pointer - 1, word2Pointer - 1);
+        }
+
+        // Save number of operations for this positioning of word pointers.
+        mem[word1Pointer][word2Pointer] = operations;
+        return operations;
+    }
+
+    public int minDistanceIterative(String word1, String word2) {
+        if (word1.equals(word2))
+            return 0;
+        if (word1.isEmpty())
+            return word2.length();
+        if (word2.isEmpty())
+            return word1.length();
+
+        int[][] dp = new int[word1.length() + 1][word2.length() + 1];
+
+        for (int i = 0; i < word1.length() + 1; i++) {
+            dp[i][0] = i;
+        }
+
+        for (int j = 0; j < word2.length() + 1; j++) {
+            dp[0][j] = j;
+        }
+
+        for (int i = 1; i < word1.length() + 1; i++) {
+            for (int j = 1; j < word2.length() + 1; j++) {
+                if (word1.charAt(i - 1) != word2.charAt(j - 1)) {
+                    dp[i][j] = Math.min(dp[i - 1][j - 1], Math.min(dp[i - 1][j], dp[i][j - 1])) + 1;
+                } else {
+                    dp[i][j] = dp[i - 1][j - 1];
+                }
+            }
+        }
+
+        return dp[word1.length()][word2.length()];
+    }
+
+    public static void main(String[] args) {
+        EditDistance ed = new EditDistance();
+        System.out.println(ed.minDistance("a", "abbbb"));
+        System.out.println(ed.minDistance("horse", "ros"));
+        System.out.println(ed.minDistance("ros", "horse"));
+        System.out.println(ed.minDistance("intention", "execution"));
+        System.out.println(ed.minDistance("asdgkljsklgjiowjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwer",
+                "execuasdjkasfafsgsdfwerqgdssccsdction"));
+        System.out.println(ed.minDistance("asdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwer",
+                "execuasdjkasfafsgsdfwerqgdssccsdction"));
+        System.out.println(ed.minDistance("intention", ""));
+        System.out.println(ed.minDistance("", ""));
+        System.out.println("==========");
+        System.out.println(ed.minDistanceIterative("a", "abbbb"));
+        System.out.println(ed.minDistanceIterative("horse", "ros"));
+        System.out.println(ed.minDistanceIterative("ros", "horse"));
+        System.out.println(ed.minDistanceIterative("intention", "execution"));
+        System.out.println(ed.minDistanceIterative("asdgkljsklgjiowjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwer",
+                "execuasdjkasfafsgsdfwerqgdssccsdction"));
+        System.out.println(ed.minDistanceIterative("asdgkljasdgkasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwer",
+                "asdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwerasdgkljsklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwersklgjioxwjtwebewgbnmdsbnbsdgnmbsdmgbjkekjwer"));
+        System.out.println(ed.minDistanceIterative("intention", ""));
+        System.out.println(ed.minDistanceIterative("", ""));
+    }
+
+}
